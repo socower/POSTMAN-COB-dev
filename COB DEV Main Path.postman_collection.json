@@ -1,0 +1,2502 @@
+{
+	"variables": [],
+	"info": {
+		"name": "COB (DEV) Main Path",
+		"_postman_id": "2e931818-6cf6-d016-c7fa-db126fdbaf65",
+		"description": "COB Client API tests (DEV)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "First name",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Name 'Bob' was found correctly\"] = responseBody.has ('Bob');",
+							"",
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": {
+					"raw": "http://cobapidev/api/Client/Search?forename=bob",
+					"protocol": "http",
+					"host": [
+						"cobapidev"
+					],
+					"path": [
+						"api",
+						"Client",
+						"Search"
+					],
+					"query": [
+						{
+							"key": "forename",
+							"value": "bob",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "NI number",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"National Insurance number was found correctly\"] = responseBody.has ('ZY625431A');//Basic test that searches for a String within the Response body",
+							"",
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;//Tests that the Response time is below a certain value",
+							"",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;//tests the response code is equal to a value",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;//tests the response code is not equal to a value",
+							"",
+							"",
+							"",
+							"var jsonBody = JSON.parse(responseBody);//Takes the entire response body and assigns it to a variable called jsonBody",
+							"var clients = jsonBody.Clients;//looks within jsonBody for the array called Clients and assigns it to a variable called \"clients\"",
+							"var resultCount = parseInt(jsonBody.ResultCount);",
+							"",
+							"//verify that at least one result has desired NiNumber",
+							"var containsNInumber = false;//sets the a variable to false",
+							"",
+							"if(clients.find(x => x.NiNumber === 'ZY625431A')){//starts an if statement that looks within the variable called \"clients\" and looks for a value called NiNumber that is equal to ZY625431A",
+							"    containsNInumber = true;//changes the variable to true",
+							"}",
+							"",
+							"tests[\"Does response contain Clients National Insurance number \"] = containsNInumber;//this is a test that will ask the variable if it is true (pass) or false (fail)",
+							"//",
+							"",
+							"//verify all have expected NiNumber",
+							"var verified = 0;",
+							"",
+							"clients.forEach((x) => {",
+							"    if(x.NiNumber === 'ZY625431A')",
+							"        verified++;",
+							"});",
+							"",
+							"tests[\"All results have NiNumber 'ZY625431A'\"] = (verified === resultCount);",
+							"//",
+							"",
+							"//verify at least one FmCode === 'XCS'",
+							"var xcsClients = clients.filter(x => x.FmCode === \"XCS\"); // <== array!",
+							"",
+							"tests[\"A search for NINo 'ZY625431A' returns at least one XCS client\"] = xcsClients;",
+							"",
+							"//verify that FiscalKey 'FOX  4015' is in the xcsClients Array",
+							"tests[\"A search for NINo 'ZY625431A' returns FOX 4015\"] = xcsClients.find(x => x.FiscalKey === \"FOX  4015\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"url": {
+					"raw": "http://cobapidev/api/Client/Search?ninumber=ZY625431A",
+					"protocol": "http",
+					"host": [
+						"cobapidev"
+					],
+					"path": [
+						"api",
+						"Client",
+						"Search"
+					],
+					"query": [
+						{
+							"key": "ninumber",
+							"value": "ZY625431A",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Master/ lookup AccountType",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Account type PVTCLNT was found correctly\"] = responseBody.has ('PVTCLNT','Private Client');",
+							"",
+							"tests[\"Response time is less than 500ms\"] = responseTime < 500;",
+							"",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"var jsonBody = JSON.parse(responseBody);",
+							"",
+							"var cltOptions;",
+							"",
+							"var x;",
+							"for (x in jsonBody){",
+							"    var category = jsonBody[x];",
+							"    if (category.CategoryName === \"AccountType\"){",
+							"        cltOptions = category.LookupItems;",
+							"    }",
+							"}",
+							"",
+							"var prvtClt = false;",
+							"",
+							"if(cltOptions.find(x => x.Code === 'PVTCLNT')){",
+							"    prvtClt = true;",
+							"}",
+							"",
+							"tests[\"Private client is an option for cases \"] = prvtClt;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Master/GetAllEnumLookup",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Master Client source type",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Account type FISCAL was found correctly\"] = responseBody.has ('FISCAL');",
+							"",
+							"tests[\"Account type AML was found correctly\"] = responseBody.has ('AML','AML');",
+							"",
+							"tests[\"Account type DPG was found correctly\"] = responseBody.has ('DPG','DPG');",
+							"",
+							"tests[\"Response time is less than 500ms\"] = responseTime < 500;",
+							"",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"var containsCategoryWorkflowState = false;",
+							"",
+							"if(jsonData.find(x => x.CategoryName == 'WorkflowState')){",
+							"    containsCategoryWorkflowState = true;",
+							"}",
+							"",
+							"tests[\"Does response contain enum with CategoryName WorkflowState \"] = containsCategoryWorkflowState;",
+							"",
+							"",
+							"var containsCategoryCaseType = false;",
+							"",
+							"if(jsonData.find(x => x.CategoryName == 'CaseType')){",
+							"    containsCategoryCaseType = true;",
+							"}",
+							"",
+							"tests[\"Does response contain enum with CategoryName CaseType \"] = jsonData.find(x => x.CategoryName == 'CaseType');"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Master/GetAllEnumLookup",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Client source Fiscal",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 500ms\"] = responseTime < 500;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"var category = jsonData.find(x => x.CategoryName === \"ClientSourceType\");",
+							"var lookupitems = category.LookupItems;",
+							"",
+							"var containsFiscal = false;",
+							"",
+							"if(lookupitems.find(x => x.Code === 'FISCAL')){",
+							"    containsFiscal = true;",
+							"}",
+							"",
+							"tests[\"Fiscal client source type present \"] = containsFiscal;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Master/GetAllEnumLookup",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": "This test is to ensure the api can find the source type of Fiscal"
+			},
+			"response": []
+		},
+		{
+			"name": "Client source AML",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 500ms\"] = responseTime < 500;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"var category = jsonData.find(x => x.CategoryName === \"ClientSourceType\");",
+							"var lookupitems = category.LookupItems;",
+							"",
+							"var containsAML = false;",
+							"",
+							"if(lookupitems.find(x => x.Code === 'AML')){",
+							"    containsAML = true;",
+							"}",
+							"",
+							"tests[\"AML client source type present \"] = containsAML;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Master/GetAllEnumLookup",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": "This test is to ensure a client can have the source type of AML"
+			},
+			"response": []
+		},
+		{
+			"name": "Client source DPG",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 500ms\"] = responseTime < 500;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"var category = jsonData.find(x => x.CategoryName === \"ClientSourceType\");",
+							"var lookupitems = category.LookupItems;",
+							"",
+							"var containsDPG = false;",
+							"",
+							"if(lookupitems.find(x => x.Code === 'DPG')){",
+							"    containsDPG = true;",
+							"}",
+							"",
+							"tests[\"DPG client source type present \"] = containsDPG;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Master/GetAllEnumLookup",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": "The purpose of this test is to ensure the client source can be received if it is DPG"
+			},
+			"response": []
+		},
+		{
+			"name": "Workflow case confirmation",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 500ms\"] = responseTime < 500;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"var workflowId = false;",
+							"var jsonData  = JSON.parse(responseBody);",
+							"var assignee = jsonData.CaseWorkflow;",
+							"//tests that the assigned ID is correct",
+							"if (jsonData.WorkflowItemId === 82){",
+							"    workflowId = true;",
+							"}",
+							"",
+							"tests[\"Ensure a workflow can be retrieved \"] = workflowId;",
+							"",
+							"var clientType = false;",
+							"//Tests that the type of client is set to Private",
+							"if(jsonData.AccountType ===\"Private Client\"){",
+							"    var clientType = true;",
+							"}",
+							"",
+							"tests [\"Client type is set to Private \"] = clientType;",
+							"",
+							"var creatorName = false;",
+							"//Test is used to ensure the workflow is assigned correctly",
+							"if (assignee.Username === \"S.Thompson\"){",
+							"    var creatorName = true;",
+							"}",
+							"",
+							"tests [\"Case is correctly assigned \"] = creatorName;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": {
+					"raw": "http://cobapidev/api/Case/GetCaseByWorkflowItemId?workflowItemId=82",
+					"protocol": "http",
+					"host": [
+						"cobapidev"
+					],
+					"path": [
+						"api",
+						"Case",
+						"GetCaseByWorkflowItemId"
+					],
+					"query": [
+						{
+							"key": "workflowItemId",
+							"value": "82",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Countries",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"var jsonBody = JSON.parse(responseBody);",
+							"",
+							"var containsAustralia = false;//sets the a variable to false",
+							"",
+							"if(jsonBody.find(x => x.Name === 'AUSTRALIA')){//starts an if statement that looks within the variable called \"jsonBody\" and looks for a value called Name that is equal to Australia",
+							"    containsAustralia = true;//changes the variable to true",
+							"}",
+							"",
+							"tests[\"Does response contains Nation of Australia \"] = containsAustralia;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": {
+					"raw": "http://cobapidev/api/Master/GetAllCountries?fatcaMode=AA",
+					"protocol": "http",
+					"host": [
+						"cobapidev"
+					],
+					"path": [
+						"api",
+						"Master",
+						"GetAllCountries"
+					],
+					"query": [
+						{
+							"key": "fatcaMode",
+							"value": "AA",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Postcode",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !==422;",
+							"",
+							"var jsonBody = JSON.parse(responseBody);",
+							"var clients = jsonBody.Clients;",
+							"",
+							"//verify that at least one result has desired Postcode",
+							"var containsAddress = false;",
+							"",
+							"if(clients.find(x => x.Address === 'Adams Johnson Green Ltd, 24/26 Minories, London, EC3N 1BY')){",
+							"    containsAddress = true;",
+							"}",
+							"",
+							"tests[\"The expected postcode and address has been found \"] = containsAddress;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": {
+					"raw": "http://cobapidev/api/Client/Search?postcode=EC3N%201BY",
+					"protocol": "http",
+					"host": [
+						"cobapidev"
+					],
+					"path": [
+						"api",
+						"Client",
+						"Search"
+					],
+					"query": [
+						{
+							"key": "postcode",
+							"value": "EC3N%201BY",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Workflow Notes",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 500ms\"] = responseTime < 500;",
+							"",
+							"tests[\"Status code is 200\"] = responseCode.code =200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"var jsonBody = JSON.parse(responseBody);",
+							"",
+							"var notePresent = false;",
+							"//tests if the note string is picked up",
+							"if(jsonBody.find(x => x.Note === 'hey')){",
+							"    notePresent = true;",
+							"}",
+							"",
+							"tests[\"Note has been retrieved \"] = notePresent;",
+							"",
+							"//tests if the note type is correct",
+							"var NoteType = false;",
+							"if(jsonBody.find(z => z.NoteType === 'General note')){",
+							"    var NoteType = true;",
+							"}",
+							"",
+							"tests[\"Note type is correct\"] = NoteType;",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"url": {
+					"raw": "http://cobapidev/api/Case/GetCaseWorkflowItemNotes?caseId=1266",
+					"protocol": "http",
+					"host": [
+						"cobapidev"
+					],
+					"path": [
+						"api",
+						"Case",
+						"GetCaseWorkflowItemNotes"
+					],
+					"query": [
+						{
+							"key": "caseId",
+							"value": "1266",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Acknowledgement of Notes",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 500ms\"] = responseTime < 500;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !==422;",
+							"",
+							"var jsonBody = JSON.parse(responseBody);",
+							"",
+							"var AcknowledgeFlag = false;",
+							"",
+							"//tests acknowledgment of the note",
+							"if (jsonBody.find(x => x.Acknowledged === true)){",
+							"    AcknowledgeFlag = true;",
+							"}",
+							"",
+							"tests[\"Note has been acknowledged \"] = AcknowledgeFlag;",
+							"",
+							"var AcknowledgePerson = false;",
+							"",
+							"//tests acknowledgment person",
+							"if (jsonBody.find (z=> z.AcknowledgedBy === \"S.Thompson\")){",
+							"    AcknowledgePerson = true;",
+							"}",
+							"",
+							"tests[\"Note has been acknowledged by a valid person \"] = AcknowledgePerson;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": {
+					"raw": "http://cobapidev/api/Case/GetCaseWorkflowItemNotes?caseId=1269",
+					"protocol": "http",
+					"host": [
+						"cobapidev"
+					],
+					"path": [
+						"api",
+						"Case",
+						"GetCaseWorkflowItemNotes"
+					],
+					"query": [
+						{
+							"key": "caseId",
+							"value": "1269",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Confirming uploaded documents",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 4000ms\"] = responseTime < 4000;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"var jsonBody = JSON.parse(responseBody);",
+							"",
+							"var calDoc = false;",
+							"//tests if the Attached file is picked up",
+							"if(jsonBody.find(x => x.DocumentType === 'CALs')){",
+							"    calDoc = true;",
+							"}",
+							"",
+							"tests[\"CAL document found \"] = calDoc;",
+							"",
+							"var DocType = false;",
+							"//tests if the Attached file is picked up as a PDF",
+							"if(jsonBody.find(x => x.FileExtension === 'pdf')){",
+							"    DocType = true;",
+							"}",
+							"",
+							"tests[\"PDF extension found document found \"] = DocType;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": {
+					"raw": "http://cobapidev/api/Document/GetDocumentsForCase?caseId=1269",
+					"protocol": "http",
+					"host": [
+						"cobapidev"
+					],
+					"path": [
+						"api",
+						"Document",
+						"GetDocumentsForCase"
+					],
+					"query": [
+						{
+							"key": "caseId",
+							"value": "1269",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Setting note to Authenticated",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code === 200;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/AcknowledgeWorkflowItemNote",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "WorkflowItemNoteId",
+							"value": "2280",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "Username",
+							"value": "\"s.thompson\"",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "Identifier",
+							"value": "\"string\"",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "CreateNewPrivateCase",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"",
+							"var jsonBody = JSON.parse(responseBody);",
+							"var Workflow = jsonBody.CaseWorkflow;",
+							"postman.setEnvironmentVariable(\"CaseIdNum\", jsonBody.CaseId);",
+							"",
+							"var caseCreated = false;",
+							"//tests if the correct Workflow state string is picked up",
+							"if(Workflow.WorkflowStateCode === 'CRTD'){",
+							"    caseCreated = true;",
+							"}",
+							"",
+							"tests[\"New case has been created \"] = caseCreated;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/CreateCase",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "IsAmend",
+							"value": "false",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "AccountType",
+							"value": "PVTCLNT",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "Title",
+							"value": "Doctor",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "Forename",
+							"value": "John",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "Middlename",
+							"value": "Average",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "Surname",
+							"value": "Doe",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "ClientName",
+							"value": "",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "AmendmentCriteria",
+							"value": "",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Post/create a new note",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"var jsonBody = JSON.parse(responseBody);",
+							"",
+							"var noteCreated = false;",
+							"//tests if the note string is picked up",
+							"if(jsonBody.Note === 'This is an API note'){",
+							"    noteCreated = true;",
+							"}",
+							"",
+							"tests[\"New note has been retrieved \"] = noteCreated;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/CreateCaseWorkflowItemNote",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "CaseId",
+							"value": "{{CaseIdNum}}",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "WorkflowStateCode",
+							"value": "DATACAPT",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "SectionCode",
+							"value": "null",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "NoteTypeCode",
+							"value": "General",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "Note",
+							"value": "This is an API note",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Workflow Upload to AML",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"var jsonBody = JSON.parse(responseBody);",
+							"var Workflow = jsonBody.CaseWorkflow;",
+							"",
+							"var caseDocumentDone = false;",
+							"//tests if the correct Workflow state string is picked up",
+							"if(Workflow.WorkflowTaskCode === 'ULDDOC'){",
+							"    caseDocumentDone = true;",
+							"}",
+							"",
+							"tests[\"Case has been moved to AML Check \"] = caseDocumentDone;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/UpdateWorkflowWithNotes",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "CaseId",
+							"value": "{{CaseIdNum}}",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "TaskCode",
+							"value": "ULDDOC",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "WorkflowNote",
+							"value": "",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "Username",
+							"value": "S.Thompson",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "Roles",
+							"value": "",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "Identifier",
+							"value": "",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "SaveExsistingAml",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"var jsonBody = JSON.parse(responseBody);",
+							"",
+							"var AMLPass = false;",
+							"//tests if a valid AML has been assigned correctly",
+							"if(jsonBody.AmlStatus === 'PASS'){",
+							"    AMLPass = true;",
+							"}",
+							"",
+							"tests[\"Valid AML has been assigned \"] = AMLPass;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Aml/SaveAml",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"PersonDetails\":\r\n{\r\n    \"AccountRoleCode\": \"\",\r\n    \"AccountRole\": \"\",\r\n    \"Crs\": true,\r\n    \"Section18\": true,\r\n    \"Address\": {\r\n      \"Id\": 0,\r\n      \"CaseId\": {{CaseIdNum}},\r\n      \"CasePersonId\": 0,\r\n      \"Addressee\": \"Connor Thompson\",\r\n      \"BuildingNumber\": \"44\",\r\n      \"BuildingName\": \"\",\r\n      \"FlatNumber\": \"\",\r\n      \"Street1\": \"\",\r\n      \"Street2\": \"\",\r\n      \"SubLocality\": \"\",\r\n      \"Locality\": \"\",\r\n      \"City\": \"\",\r\n      \"State\": \"\",\r\n      \"Zipcode\": \"\",\r\n      \"CountryCode\": \"UK\",\r\n      \"Postcode\": \"SS0 0DP\",\r\n      \"Email\": \"\"\r\n    },\r\n    \"Id\": 0,\r\n    \"CaseId\": 1314,\r\n    \"AmlPersonTypeCode\": \"CLNT\",\r\n    \"AmlPersonType\": \"\",\r\n    \"AmlStatus\": \"PASS\",\r\n    \"AmlReference\": \"200055\",\r\n    \"ShortName\": \"\",\r\n    \"TitleCode\": \"Mr\",\r\n    \"Title\": \"\",\r\n    \"Forename\": \"Connor\",\r\n    \"OtherNames\": \"\",\r\n    \"Surname\": \"Thompson\",\r\n    \"GenderCode\": \"\",\r\n    \"Gender\": \"\",\r\n    \"DateOfBirth\": \"10 DEC 1999\",\r\n    \"NationalityCode\": \"\",\r\n    \"TownOfBirth\": \"\",\r\n    \"CountryOfBirthCode\": \"\",\r\n    \"ResidencyCode\": \"UK\",\r\n    \"VatResidencyCode\": \"\",\r\n    \"ControllingPerson\": true,\r\n    \"OccupationCatCode\": \"\",\r\n    \"OccupationCode\": \"\",\r\n    \"OtherOccupation\": \"\",\r\n    \"PrevOccupationCatCode\": \"\",\r\n    \"PrevOccupationCode\": \"\",\r\n    \"PrevOtherOccupation\": \"\",\r\n    \"HomePhone\": \"\",\r\n    \"MobilePhone\": \"\",\r\n    \"BusinessPhone\": \"\",\r\n    \"PartnerEmail\": \"\",\r\n    \"OnlineAccessFlag\": true,\r\n    \"OnlineAccessKey\": \"\",\r\n    \"OnlineGcn\": \"\"\r\n } \r\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Workflow AML to Data Capture",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"var jsonBody = JSON.parse(responseBody);",
+							"var Workflow = jsonBody.CaseWorkflow;",
+							"",
+							"",
+							"var caseAMLDone = false;",
+							"//tests if the correct Workflow state string is picked up",
+							"if(Workflow.WorkflowStateCode === 'DATACAPT'){",
+							"    caseAMLDone = true;",
+							"}",
+							"",
+							"tests[\"Case has been moved to Data Capture \"] = caseAMLDone;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/UpdateWorkflowWithNotes",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "CaseId",
+							"value": "{{CaseIdNum}}",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "TaskCode",
+							"value": "ACPTAML",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "WorkflowNote",
+							"value": "",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Save Case Personal Details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/SaveCasePersonalDetail",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"PersonDetails\": {\r\n    \"Address\": {\r\n\"Addressee\":\"Doctor John Doe\",\r\n\"BuildingName\":null,\r\n\"BuildingNumber\":\"44\",\r\n\"CaseId\":{{CaseIdNum}},\r\n\"City\":\"Westcliff-on-sea\",\r\n\"CountryCode\":\"GB\",\r\n\"Email\":null,\r\n\"FlatNumber\":null,\r\n\"Locality\":null,\r\n\"Postcode\":\"ss0 0dp\",\r\n\"State\":null,\r\n\"Street1\":\"Winsford Gardens\",\r\n\"Street2\":null,\r\n\"SubLocality\":null,\r\n\"Zipcode\":null\r\n    },\r\n\"AmlPersonTypeCode\":\"CLNT\",\r\n\"BusinessPhone\":null,\r\n\"CaseId\":{{CaseIdNum}},\r\n\"ControllingPerson\":null,\r\n\"CountryOfBirthCode\":\"GB\",\r\n\"DateOfBirth\":\"1999-12-10\",\r\n\"Forename\":\"John\",\r\n\"GenderCode\":\"M\",\r\n\"HomePhone\":\"01702334455\",\r\n\"MobilePhone\":null,\r\n\"NationalityCode\":\"GB\",\r\n\"OccupationCatCode\":\"Media\",\r\n\"OccupationCode\":\"ACTOR\",\r\n\"OtherNames\":null,\r\n\"OtherOccupation\":\"\",\r\n\"PrevOccupationCatCode\":\"\",\r\n\"PrevOccupationCode\":\"\",\r\n\"PrevOtherOccupation\":null,\r\n\"ResidencyCode\":\"GB\",\r\n\"ShortName\":\"John\",\r\n\"Surname\":\"Doe\",\r\n\"TitleCode\":\"Doctor\",\r\n\"ValidationErrorMessage\":\"Missing data for mandatory fields\",\r\n\"VatResidencyCode\":\"UKIOM\",\r\n\"YearEnd\":null\r\n\r\n  }\r\n}\r\n"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Save Case Address",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/SaveCaseAddress",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"AddressDetail\":{\r\n\"AddressTypes\":[{\r\n\t\"AddressTypeCode\": \"Main\", \"DocumentTypeCode\": \"TaxVoucher\", \"DocumentCount\": 1\r\n},\r\n{\r\n\t\"AddressTypeCode\": \"Main\", \"DocumentTypeCode\": \"FeeInvoice\", \"DocumentCount\": 1\r\n},\r\n{\r\n\t\"AddressTypeCode\": \"Main\", \"DocumentTypeCode\": \"Correspondence\", \"DocumentCount\": 1\r\n}\r\n],\r\n\"Addressee\":\"Jane\",\r\n\"BuildingName\":\"\",\r\n\"BuildingNumber\":\"44\",\r\n\"CaseId\":{{CaseIdNum}},\r\n\"City\":\"Westcliff-on-Sea\",\r\n\"CountryCode\":\"GB\",\r\n\"DirectCopies\":0,\r\n\"FlatNumber\":\"\",\r\n\"KycCopies\":0,\r\n\"Locality\":\"Southend-on-Sea\",\r\n\"Postcode\":\"SS0 0DP\",\r\n\"State\":\"\",\r\n\"Street1\":\"Winsford Gardens\",\r\n\"Street2\":\"\",\r\n\"SubLocality\":\"\",\r\n\"Zipcode\":\"\",\r\n\"isBrandNew\":true\r\n}\r\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Save Case Account Details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/SaveCaseAccountDetails",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"CaseAccountDetails\":{\r\n\"AssignedBankAuth\":null,\r\n\"CalRecieveDate\":\"2017-08-01\",\r\n\"CalSentDate\":\"2017-08-01\",\r\n\"CaseId\":{{CaseIdNum}},\r\n\"ChequePayeeName\":null,\r\n\"Classification\":\"\",\r\n\"ClassificationCode\":\"90\",\r\n\"ClientFcaType\":\"\",\r\n\"ClientFcaTypeCode\":\"2\",\r\n\"ClientRef\":\"Parma\",\r\n\"Department\":\"\",\r\n\"DepartmentCode\":\"X\",\r\n\"Expertise\":\"\",\r\n\"ExpertiseCode\":\"\",\r\n\"FatcaClientType\":\"\",\r\n\"FatcaClientTypeCode\":null,\r\n\"FinancialPlanner\":\"\",\r\n\"FundManagerCode\":\"GE2\",\r\n\"Id\":0,\r\n\"IntroducerCode\":null,\r\n\"IsDirect\":true,\r\n\"MainClientType\":\"\",\r\n\"MainClientTypeCode\":\"P\",\r\n\"MifidClass\":\"\",\r\n\"MifidClassCode\":\"RT\",\r\n\"MifidConsentDate\":\"2017-08-21\",\r\n\"Objective\":\"\",\r\n\"ObjectiveCode\":\"G\",\r\n\"PartyAuthIssueInstr\":null,\r\n\"PartyAuthReceiveInfo\":null,\r\n\"PortfolioManager\":\"DFE\",\r\n\"Product\":\"\",\r\n\"ProductCode\":\"801#Kelloggs\",\r\n\"Registration\":\"\",\r\n\"RegistrationCode\":\"ExternalMember\",\r\n\"RepsAcctsRequired\":false,\r\n\"RequiredBankAuthLevel\":null,\r\n\"Risk\":\"\",\r\n\"RiskCode\":\"Medium/High\",\r\n\"RiskRating\":1,\r\n\"SubAccount\":null,\r\n\"SubClientType\":\"\",\r\n\"SubClientTypeCode\":\"PC\",\r\n\"SuppressContractNotes\":false,\r\n\"TAndCRefNumber\":\"Reference1\",\r\n\"TAndCVersion\":\"012345\",\r\n\"ValuationMarker\":false\r\n}\r\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Save Case Tax Details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/SaveCaseTaxDetails",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"CaseId\": {{CaseIdNum}}, \"FatcaClientTypeCode\": \"Individual\"}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Case Fees Id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"",
+							"var jsonBody = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"FeeId\", jsonBody.Id);"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": {
+					"raw": "http://cobapidev/api/Case/CaseFees?caseId={{CaseIdNum}}",
+					"protocol": "http",
+					"host": [
+						"cobapidev"
+					],
+					"path": [
+						"api",
+						"Case",
+						"CaseFees"
+					],
+					"query": [
+						{
+							"key": "caseId",
+							"value": "{{CaseIdNum}}",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Save Pack Tax Vals",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/SavePackTaxVals",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"PackTaxVals\":{\n\t\"CaseId\":{{CaseIdNum}},\n\t\"DivCurrency\":\"\",\n\t\"DivCurrencyCode\":\"£\",\n\t\"ElectronicCommOptIn\":true,\n\t\"GainLossFlag\":true,\n\t\"IncomeStatementFreq\":\"\",\n\t\"IncomeStatementFreqCode\":null,\n\t\"MarketHistory\":\"\",\n\t\"MarketHistoryCode\":4,\n\t\"PackType\":\"NONE\",\n\t\"PackTypeCode\":\"NONE\",\n\t\"PriceDateFlag\":true,\n\t\"SpouseElectronicCommOptIn\":true,\n\t\"SpouseWrittenCommOptOut\":false,\n\t\"TaxVoucherCurrCode\":null,\n\t\"TaxVoucherCurrency\":\"\",\n\t\"TaxVoucherFreq\":\"\",\n\t\"TaxVoucherFreqCode\":null,\n\t\"TaxYearEnd\":\"2018-04-06\",\n\t\"ValCurrency\":\"\",\n\t\"ValCurrencyCode\":\"£\",\n\t\"ValuationsInfo\":[{\n\t\t\"CaseId\":{{CaseIdNum}},\n\t\t\"Id\":0,\n\t\t\"KycDate\":\"2017-08-31\",\n\t\t\"ValDate\":\"2017-08-31\",\n\t\t\"ValFreq\":\"Monthly\",\n\t\t\"ValFreqCode\":\"M\"}],\n\t\"WrittenCommOptOut\":false\n}}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Save Case Bank Details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/SaveCaseBankDetails",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"CaseBankDetail\":{\n\t\t\"AccountName\":null,\n\t\t\"AccountNumber\":null,\n\t\t\"BankDetailTypes\":[{\n\t\t\t\"BankDetailTypeCode\":\"Deposit\",\n\t\t\t\"CaseBankDetailId\":0,\n\t\t\t\"Id\":0,\n\t\t\t\"PaymentMethod\":\"PAC\"\n\t\t}],\n\t\t\"CaseId\":{{CaseIdNum}},\n\t\t\"Id\":0,\n\t\t\"PaymentMethod\":\"PAC\"\n\t}\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Save Case Fees",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 1500ms\"] = responseTime < 1500;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/SaveCaseFees",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"FeeDetail\":{\n\t\"AccountToDebit\":null,\n\"AdvAgreedRemuneration\":null,\n\"AssignedAuth\":\"L.Hall\",\n\"BargainChargeCode\":\"0\",\n\"CaseId\":{{CaseIdNum}},\n\"ChargeFeesFrom\":null,\n\"Charging\":\"\",\n\"ChargingCode\":\"MainAccount\",\n\"ClientCommRule\":null,\n\"CommissionCode\":\"\",\n\"CustomBargainCharge\":null,\n\"CustomCommission\":null,\n\"CustomFee\":\"\",\n\"CustomMinFee\":null,\n\"ExemptCashFlag\":false,\n\"ExemptCashReason\":null,\n\"ExemptStockDetails\":[],\n\"ExemptStocks\":\"\",\n\"FcaType\":\"Advisory\",\n\"FcaTypeCode\":\"2\",\n\"FeeCode\":\"AFCS\",\n\"FeeCurrency\":\"GBP\",\n\"FeeCurrencyCode\":\"£\",\n\"FlatRateRule\":null,\n\"Id\":{{FeeId}},\n\"IsCustomBargainAdminCharge\":false,\n\"IsDirect\":true,\n\"LinkedAccounts\":[],\n\"MinFeeCode\":\"\",\n\"RequiredAuthLevel\":null\n}}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Post QA note Section 1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"var jsonBody = JSON.parse(responseBody);",
+							"",
+							"var noteCreated = false;",
+							"//tests if the note string is picked up",
+							"if(jsonBody.Note === 'This is an API note'){",
+							"    noteCreated = true;",
+							"}",
+							"",
+							"tests[\"New note has been retrieved \"] = noteCreated;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/CreateCaseWorkflowItemNote",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "CaseId",
+							"value": "{{CaseIdNum}}",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "WorkflowStateCode",
+							"value": "DATACAPT",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "SectionCode",
+							"value": "PERSDET",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "NoteTypeCode",
+							"value": "QA",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "Note",
+							"value": "This is an API note",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Post QA note Section 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"var jsonBody = JSON.parse(responseBody);",
+							"",
+							"var noteCreated = false;",
+							"//tests if the note string is picked up",
+							"if(jsonBody.Note === 'This is an API note also'){",
+							"    noteCreated = true;",
+							"}",
+							"",
+							"tests[\"New note has been retrieved \"] = noteCreated;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/CreateCaseWorkflowItemNote",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "CaseId",
+							"value": "{{CaseIdNum}}",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "WorkflowStateCode",
+							"value": "DATACAPT",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "SectionCode",
+							"value": "ADDRESS",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "NoteTypeCode",
+							"value": "QA",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "Note",
+							"value": "This is an API note also",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Post QA note Section 3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"var jsonBody = JSON.parse(responseBody);",
+							"",
+							"var noteCreated = false;",
+							"//tests if the note string is picked up",
+							"if(jsonBody.Note === 'This is an API note also'){",
+							"    noteCreated = true;",
+							"}",
+							"",
+							"tests[\"New note has been retrieved \"] = noteCreated;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/CreateCaseWorkflowItemNote",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "CaseId",
+							"value": "{{CaseIdNum}}",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "WorkflowStateCode",
+							"value": "DATACAPT",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "SectionCode",
+							"value": "ACCTINFO",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "NoteTypeCode",
+							"value": "QA",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "Note",
+							"value": "This is an API note also",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Post QA note Section 4",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"var jsonBody = JSON.parse(responseBody);",
+							"",
+							"var noteCreated = false;",
+							"//tests if the note string is picked up",
+							"if(jsonBody.Note === 'This is an API note also'){",
+							"    noteCreated = true;",
+							"}",
+							"",
+							"tests[\"New note has been retrieved \"] = noteCreated;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/CreateCaseWorkflowItemNote",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "CaseId",
+							"value": "{{CaseIdNum}}",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "WorkflowStateCode",
+							"value": "DATACAPT",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "SectionCode",
+							"value": "BANK",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "NoteTypeCode",
+							"value": "QA",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "Note",
+							"value": "This is an API note also",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Post QA note Section 5",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"var jsonBody = JSON.parse(responseBody);",
+							"",
+							"var noteCreated = false;",
+							"//tests if the note string is picked up",
+							"if(jsonBody.Note === 'This is an API note also'){",
+							"    noteCreated = true;",
+							"}",
+							"",
+							"tests[\"New note has been retrieved \"] = noteCreated;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/CreateCaseWorkflowItemNote",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "CaseId",
+							"value": "{{CaseIdNum}}",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "WorkflowStateCode",
+							"value": "DATACAPT",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "SectionCode",
+							"value": "ONLINEACC",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "NoteTypeCode",
+							"value": "QA",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "Note",
+							"value": "This is an API note also",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Post QA note Section 6",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"var jsonBody = JSON.parse(responseBody);",
+							"",
+							"var noteCreated = false;",
+							"//tests if the note string is picked up",
+							"if(jsonBody.Note === 'This is an API note also'){",
+							"    noteCreated = true;",
+							"}",
+							"",
+							"tests[\"New note has been retrieved \"] = noteCreated;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/CreateCaseWorkflowItemNote",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "CaseId",
+							"value": "{{CaseIdNum}}",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "WorkflowStateCode",
+							"value": "DATACAPT",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "SectionCode",
+							"value": "TAX",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "NoteTypeCode",
+							"value": "QA",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "Note",
+							"value": "This is an API note also",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Post QA note Section 7",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"var jsonBody = JSON.parse(responseBody);",
+							"",
+							"var noteCreated = false;",
+							"//tests if the note string is picked up",
+							"if(jsonBody.Note === 'This is an API note also'){",
+							"    noteCreated = true;",
+							"}",
+							"",
+							"tests[\"New note has been retrieved \"] = noteCreated;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/CreateCaseWorkflowItemNote",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "CaseId",
+							"value": "{{CaseIdNum}}",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "WorkflowStateCode",
+							"value": "DATACAPT",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "SectionCode",
+							"value": "FEES",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "NoteTypeCode",
+							"value": "QA",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "Note",
+							"value": "This is an API note also",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Post QA note Section 8",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"var jsonBody = JSON.parse(responseBody);",
+							"",
+							"var noteCreated = false;",
+							"//tests if the note string is picked up",
+							"if(jsonBody.Note === 'This is an API note also'){",
+							"    noteCreated = true;",
+							"}",
+							"",
+							"tests[\"New note has been retrieved \"] = noteCreated;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/CreateCaseWorkflowItemNote",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "CaseId",
+							"value": "{{CaseIdNum}}",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "WorkflowStateCode",
+							"value": "DATACAPT",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "SectionCode",
+							"value": "PACKTAXVAL",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "NoteTypeCode",
+							"value": "QA",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "Note",
+							"value": "This is an API note also",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Submit Case",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 600ms\"] = responseTime < 600;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/SubmitCase",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"CaseId\":{{CaseIdNum}},\n\"WorkflowNote\":\"\"}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Authorise Case",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/AuthoriseCase",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"CaseId\": {{CaseIdNum}},\r\n  \"AuthTypeCode\": \"Fees\",\r\n  \"WorkflowNote\": \"\",\r\n  \"TaskCode\": \"ACPTFEE\"\r\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "UpdateWorkflowAcceptFATCA",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/UpdateWorkflowWithNotes",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"CaseId\": {{CaseIdNum}},\r\n  \"WorkflowNote\": \"\",\r\n  \"TaskCode\": \"ACPTFATCA\"\r\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Case Section 1 Notes",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/CaseSectionNotes",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"CaseId\": {{CaseIdNum}},\r\n  \"CaseSectionCode\": \"BANK\"\r\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Accept QA note Section 1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/CaseQa/SaveCaseQaDetails",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"CaseId\": {{CaseIdNum}},\r\n  \"SectionCode\": \"PERSDET\",\r\n  \"QaStatusCode\": \"Accept\",\r\n  \"Username\": \"S.Thompson\"\r\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Accept QA note Section 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/CaseQa/SaveCaseQaDetails",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"CaseId\": {{CaseIdNum}},\r\n  \"SectionCode\": \"ADDRESS\",\r\n  \"QaStatusCode\": \"Accept\"\r\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Accept QA note Section 3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/CaseQa/SaveCaseQaDetails",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"CaseId\": {{CaseIdNum}},\r\n  \"SectionCode\": \"ACCTINFO\",\r\n  \"QaStatusCode\": \"Accept\",\r\n  \"Username\": \"S.Thompson\"\r\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Accept QA note Section 4",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/CaseQa/SaveCaseQaDetails",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"CaseId\": {{CaseIdNum}},\r\n  \"SectionCode\": \"BANK\",\r\n  \"QaStatusCode\": \"Accept\"\r\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Accept QA note Section 5",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/CaseQa/SaveCaseQaDetails",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"CaseId\": {{CaseIdNum}},\r\n  \"SectionCode\": \"ONLINEACC\",\r\n  \"QaStatusCode\": \"Accept\"\r\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Accept QA note Section 6",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/CaseQa/SaveCaseQaDetails",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"CaseId\": {{CaseIdNum}},\r\n  \"SectionCode\": \"TAX\",\r\n  \"QaStatusCode\": \"Accept\"\r\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Accept QA note Section 7",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/CaseQa/SaveCaseQaDetails",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"CaseId\": {{CaseIdNum}},\r\n  \"SectionCode\": \"FEES\",\r\n  \"QaStatusCode\": \"Accept\"\r\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Accept QA note Section 8",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/CaseQa/SaveCaseQaDetails",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"CaseId\": {{CaseIdNum}},\r\n  \"SectionCode\": \"PACKTAXVAL\",\r\n  \"QaStatusCode\": \"Accept\"\r\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Case Qa Status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"",
+							"var jsonBody = JSON.parse(responseBody);",
+							"",
+							"var Accepted = false;",
+							"//tests acceptance of the note",
+							"if (jsonBody.find(x => x.QaStatus !== null)){",
+							"    Accepted = true;",
+							"}",
+							"",
+							"tests[\"QA has accepted the sections \"] = Accepted;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": {
+					"raw": "http://cobapidev/api/CaseQa/CaseQaStatus?caseId={{CaseIdNum}}",
+					"protocol": "http",
+					"host": [
+						"cobapidev"
+					],
+					"path": [
+						"api",
+						"CaseQa",
+						"CaseQaStatus"
+					],
+					"query": [
+						{
+							"key": "caseId",
+							"value": "{{CaseIdNum}}",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Update Workflow QA Check to Closed",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than 400ms\"] = responseTime < 400;",
+							"tests[\"Status code is 200\"] = responseCode.code ===200;",
+							"tests[\"Status code is not 422\"] = responseCode.code !=422;",
+							"",
+							"var jsonBody = JSON.parse(responseBody);",
+							"",
+							"var CaseClose = false;",
+							"//tests acceptance of the note",
+							"",
+							"if (jsonBody.CaseId.toString() === postman.getEnvironmentVariable('CaseIdNum'))",
+							"{",
+							"    CaseClose = true;",
+							"}",
+							"",
+							"tests[\"The correct Case has been completed and closed \"] = CaseClose;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://cobapidev/api/Case/UpdateWorkflowWithNotes",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"CaseId\": {{CaseIdNum}},\r\n  \"WorkflowNote\": \"\",\r\n  \"TaskCode\": \"ACPTDATA\"\r\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
